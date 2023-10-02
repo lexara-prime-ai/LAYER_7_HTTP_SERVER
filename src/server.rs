@@ -16,6 +16,6 @@ impl Server {
     pub fn run(self) {
         println!("Server is listening at: {}", self.addr);
 
-        let listener = TcpListener::bind(&self.addr);
+        let listener = TcpListener::bind(&self.addr).unwrap();
     }
 }
