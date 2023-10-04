@@ -1,6 +1,12 @@
 use std::io::Read;
 use std::net::TcpListener;
 
+use crate::http::Request;
+
+use std::convert::TryFrom;
+use std::convert::TryInto;
+use log::error;
+
 pub struct Server {
     addr: String,
 }
@@ -35,7 +41,13 @@ impl Server {
                         Ok(_) => {
                             // Using from_utf8_lossy will replace invalid chars with a symbol
                             // It will not result in a crash in case byte conversion fails
-                            println!("Received a request: {}", String::from_utf8_lossy(&buffer))
+                            println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+
+                            // Create a slice that contains the entire byte array by omitting the upper and lower bounds
+                            match Request::try_from(&buffer[..]) {
+                                Ok(request) => {}
+                                Err(e) => println!("Failed to parse request: {}", e)
+                            }
                         }
                         Err(e) => println!("Failed to read from stream | connection: {}", e)
                     }
