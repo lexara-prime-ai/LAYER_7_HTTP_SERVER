@@ -5,25 +5,21 @@ use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::str;
 use std::str::Utf8Error;
 
-pub struct Request {
-    path: String,
-    query_string: Option<String>,
+// Specify lifetime for buffer -> 'buf
+pub struct Request<'buf> {
+    path: &'buf str,
+    query_string: Option<&'buf str>,
     method: RequestMethod,
 }
 
-impl Request {
-    fn from_byte_array(buf: &[u8]) -> Result<Self, String> {
-        unimplemented!();
-    }
-}
-
 // Buffer conversion
-impl TryFrom<&[u8]> for Request {
+impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     // Implement custom error enum
     type Error = ParseError;
 
     // GET /search?name=abc&sort=1 HTTP/1.1 -> HTTP Request to be parsed
-    fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
+    // A reference to a location in memory will be passed when this method is called &'buf -> reference to buffer
+    fn try_from(buf: &'buf [u8]) -> Result<Request<'buf>, Self::Error> {
         let request = str::from_utf8(buf)?;
 
         // Read from request & assign the result to a tuple ->  (method, request)
@@ -46,7 +42,11 @@ impl TryFrom<&[u8]> for Request {
             path = &path[..i];
         }
 
-        unimplemented!();
+        Ok(Self {
+            path,
+            query_string,
+            method,
+        })
     }
 }
 
