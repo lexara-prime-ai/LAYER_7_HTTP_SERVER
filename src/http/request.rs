@@ -28,7 +28,7 @@ impl TryFrom<&[u8]> for Request {
 
         // Read from request & assign the result to a tuple ->  (method, request)
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
-        let (path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
+        let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (protocol, _) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
 
         if protocol != "HTTP/1.1" {
@@ -36,6 +36,16 @@ impl TryFrom<&[u8]> for Request {
         }
 
         let method: RequestMethod = method.parse()?;
+
+        // Set the mutable query_string to None
+        let mut query_string = None;
+
+        // Use if let statement to match '?' in query_string
+        if let Some(i) = path.find('?') {
+            query_string = Some(&path[i + 1..]);
+            path = &path[..i];
+        }
+
         unimplemented!();
     }
 }
@@ -104,3 +114,4 @@ impl ParseError {
 //          i.e println!("{}", text)
 //              println!("{:?}") -> Specifies that we want to use the debugger formatter.
 impl Error for ParseError {}
+
