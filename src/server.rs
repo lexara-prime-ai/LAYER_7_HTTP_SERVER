@@ -45,7 +45,10 @@ impl Server {
 
                             // Create a slice that contains the entire byte array by omitting the upper and lower bounds
                             match Request::try_from(&buffer[..]) {
-                                Ok(request) => {}
+                                Ok(request) => {
+                                    // Format & log requests to the console
+                                    dbg!(request);
+                                }
                                 Err(e) => println!("Failed to parse request: {}", e)
                             }
                         }

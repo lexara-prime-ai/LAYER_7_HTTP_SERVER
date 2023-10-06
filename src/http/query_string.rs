@@ -1,17 +1,20 @@
 use std::collections::HashMap;
 
 // Representing the query string with a hash map
+#[derive(Debug)]
 pub struct QueryString<'buf> {
     data: HashMap<&'buf str, Value<'buf>>,
 }
 
+#[derive(Debug)]
 pub enum Value<'buf> {
     Single(&'buf str),
     // Use heap allocated array that will grow dynamically
     Multiple(Vec<&'buf str>),
 }
 
-// Read keys from hash map
+// Read keys from hash map | e.g query string with wild cards
+//      a=1&b=2&c&d=&e===&d=7=&d=abc
 impl<'buf> QueryString<'buf> {
     // IThis method takes a reference from the QueryString
     pub fn get(&self, key: &str) -> Option<&Value> {
