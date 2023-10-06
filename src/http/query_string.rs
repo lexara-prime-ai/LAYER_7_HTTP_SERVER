@@ -49,7 +49,7 @@ impl<'buf> From<&'buf str> for QueryString<'buf> {
                     }
                     Value::Multiple(vec) => vec.push(val)
                 })
-                .or_insert(Value::Single(val))
+                .or_insert(Value::Single(val));
         }
 
         QueryString { data }
