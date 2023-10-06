@@ -14,6 +14,26 @@ pub struct Request<'buf> {
     method: RequestMethod,
 }
 
+// Implement the use of getters to allow access to the Request fields from outside the module
+impl<'buf> Request<'buf> {
+    // Getter for path
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    // Getter for method
+    pub fn method(&self) -> &RequestMethod {
+        &self.method
+    }
+
+    // Getter for query_string
+    pub fn query_string(&self) -> Option<&QueryString> {
+        // Get the reference of whatever is being wrapped instead of having:: &Option<QueryString> we have:: Option<&QueryString>
+        self.query_string.as_ref()
+    }
+}
+
+
 // Buffer conversion
 impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     // Implement custom error enum

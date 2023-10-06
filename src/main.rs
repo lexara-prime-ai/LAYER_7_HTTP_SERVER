@@ -4,7 +4,9 @@
 #![allow(unused_variables)]
 
 
+use std::fmt::format;
 use server::Server;
+use std::env;
 use http::Request;
 use http::RequestMethod;
 use website_handler::WebsiteHandler;
@@ -15,14 +17,16 @@ mod website_handler;
 
 
 fn main() {
-    // let get = http::method::RequestMethod::GET;
-    // let delete = http::method::RequestMethod::DELETE;
-    // let post = http::method::RequestMethod::POST;
-    // let put = http::method::RequestMethod::PUT;
-    let mut input = String::new();
+    // Use the CARGO_MANIFEST_DIR environment varible set by cargo at run time to set the default path/working directory
+    let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
+    // Set custom environment variable -> PUBLIC_PATH
+    let public_path = env::var("PUBLIC_PATH").unwrap_or(default_path);
+
+    // Print default path to console
+    println!("Public Path: {}", public_path);
 
     let server = Server::new("127.0.0.1:8000".to_string());
-    server.run(WebsiteHandler);
+    server.run(WebsiteHandler::new(public_path));
 }
 
 
