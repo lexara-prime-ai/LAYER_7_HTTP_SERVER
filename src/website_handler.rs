@@ -15,7 +15,29 @@ impl WebsiteHandler {
     // Method for serving static files
     fn read_file(&self, file_path: &str) -> Option<String> {
         let path = format!("{}/{}", self.public_path, file_path);
-        fs::read_to_string(path).ok()
+        // Prevent path traversal -> This will not work on windows machines because of how paths are defined on Windows Operating Systems.
+        // Try the basic alternative at the bottom if this doesn't work for you.
+        // match fs::canonicalize(path) {
+        //     Ok(path) => {
+        //         println!("REQUESTED FILE: {:?}\n", path);
+        //         if path.starts_with(&self.public_path) {
+        //             fs::read_to_string(path).ok()
+        //         } else {
+        //             println!("::Not Allowed::{}", file_path);
+        //             None
+        //         }
+        //     }
+        //     Err(_) => None
+        // }
+
+        // FIX FOR USERS RUNNING WINDOWS
+        if path.starts_with(&self.public_path) {
+            println!("REQUESTED FILE: {:?}\n", path);
+            fs::read_to_string(path).ok()
+        } else {
+            println!("::Not Allowed::{}", file_path);
+            None
+        }
     }
 }
 
@@ -25,7 +47,10 @@ impl Handler for WebsiteHandler {
             RequestMethod::GET => match request.path() {
                 "/" => Response::new(StatusCode::Ok, self.read_file("index.html")),
                 "/downloads" => Response::new(StatusCode::Ok, self.read_file("downloads.html")),
-                _ => Response::new(StatusCode::NotFound, None),
+                path => match self.read_file(path) {
+                    Some(contents) => Response::new(StatusCode::Ok, Some(contents)),
+                    None => Response::new(StatusCode::NotFound, None),
+                },
             },
             _ => Response::new(StatusCode::NotFound, None),
         }
